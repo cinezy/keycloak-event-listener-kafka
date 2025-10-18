@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "maven" # Change based on your package manager (npm, gradle, pip, etc.)
+    directory: "/" # Root directory of your project
+    schedule:
+      interval: "weekly" # Options: daily, weekly, monthly
+    open-pull-requests-limit: 5
+    reviewers:
+      - "nduyhai"
+    labels:
+      - "dependencies"

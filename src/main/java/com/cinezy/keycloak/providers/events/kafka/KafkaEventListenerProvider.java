@@ -19,38 +19,30 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
   private final String topicUser;
   private final String topicAdmin;
   private final boolean sync;
+  private final boolean enableUserEvents;
+  private final boolean enableAdminEvents;
 
   public KafkaEventListenerProvider(
       KeycloakSession session,
-      String bootstrapServers,
       String topicUser,
       String topicAdmin,
-      String acks,
       boolean sync,
-      Integer lingerMs,
-      Integer batchSize,
-      Integer retries,
-      String securityProtocol,
-      String saslMechanism,
-      String saslJaasConfig) {
+      KafkaProducerHolder.Config config,
+      boolean enableUserEvents,
+      boolean enableAdminEvents) {
     this.session = session;
     this.topicUser = topicUser;
     this.topicAdmin = topicAdmin;
     this.sync = sync;
+    this.enableUserEvents = enableUserEvents;
+    this.enableAdminEvents = enableAdminEvents;
 
-    KafkaProducerHolder.initIfNeeded(
-        bootstrapServers,
-        acks,
-        lingerMs,
-        batchSize,
-        retries,
-        securityProtocol,
-        saslMechanism,
-        saslJaasConfig);
+    KafkaProducerHolder.initIfNeeded(config);
   }
 
   @Override
   public void onEvent(Event event) {
+    if (!enableUserEvents) return;
     try {
       var payload = UserEventPayload.from(event, session);
       var json = mapper.writeValueAsString(payload);
@@ -68,6 +60,7 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
   @Override
   public void onEvent(AdminEvent adminEvent, boolean includeRepresentation) {
+    if (!enableAdminEvents) return;
     try {
       var payload = AdminEventPayload.from(adminEvent, session, includeRepresentation);
       var json = mapper.writeValueAsString(payload);
