@@ -1,8 +1,8 @@
-name: Publish package
+name: Publish
 on:
   push:
-    tags:
-      - 'v*'         # publish on version tags like v1.0.0
+    tags: [ 'v*' ]
+
 permissions:
   contents: read
   packages: write
@@ -15,15 +15,24 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
           cache: maven
           server-id: github
           settings-path: ${{ github.workspace }}
-      - name: Configure settings.xml server creds
+      - name: Write settings.xml
         run: |
-          mkdir -p ~/.m2
-          cp $GITHUB_WORKSPACE/settings.xml ~/.m2/settings.xml
+          cat > settings.xml <<'XML'
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          XML
+      - name: Deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build & deploy
-        run: mvn -B -DskipTests deploy
+        run: mvn -B -s ./settings.xml -DskipTests deploy
