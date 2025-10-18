@@ -4,7 +4,7 @@
 
     <groupId>com.cinezy.keycloak</groupId>
     <artifactId>keycloak-event-listener-kafka</artifactId>
-    <version>1.0.0</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
 
     <name>keycloak-event-listener-kafka</name>
