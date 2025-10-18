@@ -75,6 +75,18 @@ extraEnv:
 
 ---
 
+### Test with Docker compose
+```bash
+mvn clean package -DskipTests
+
+mkdir -p providers
+# copy your jar into ./providers/
+cp target/keycloak-event-listener-kafka-*.jar ./providers/
+
+docker-compose up -d
+
+```
+
 ## ⚙️ Configuration
 
 All configuration lives under one **flat scope** (`spi-events-listener-kafka-*`),  

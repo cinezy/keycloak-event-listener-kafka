@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"   # external (host) access as localhost:9092
+      - "29092:29092" # internal docker network access
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # Two listeners: one for containers (kafka:29092), one for host (localhost:9092)
+      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://0.0.0.0:29092,PLAINTEXT_EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:29092,PLAINTEXT_EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.0
+    container_name: keycloak
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      # --- Your SPI config (flat, spring-like) ---
+      KC_SPI_EVENTS_LISTENER_KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+      KC_SPI_EVENTS_LISTENER_KAFKA_CLIENT_ID: "cinezy"
+      KC_SPI_EVENTS_LISTENER_KAFKA_PRODUCER_ACKS: "all"
+      KC_SPI_EVENTS_LISTENER_KAFKA_PRODUCER_ENABLE_IDEMPOTENCE: "true"
+      KC_SPI_EVENTS_LISTENER_KAFKA_TOPIC_USER: "keycloak.user.events"
+      KC_SPI_EVENTS_LISTENER_KAFKA_TOPIC_ADMIN: "keycloak.admin.events"
+      KC_SPI_EVENTS_LISTENER_KAFKA_ENABLE_USER_EVENTS: "true"
+      KC_SPI_EVENTS_LISTENER_KAFKA_ENABLE_ADMIN_EVENTS: "true"
+      KC_SPI_EVENTS_LISTENER_KAFKA_SYNC: "false"
+      KC_LOG_LEVEL: info,com.cinezy:debug
+
+    volumes:
+      # Put your shaded provider JAR(s) in ./providers
+      - ./providers:/opt/keycloak/providers:ro
+    command:
+      - start-dev
+      - --http-enabled=true
+      - --hostname-strict=false
