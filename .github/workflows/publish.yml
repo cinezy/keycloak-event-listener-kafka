@@ -1,0 +1,29 @@
+name: Publish package
+on:
+  push:
+    tags:
+      - 'v*'         # publish on version tags like v1.0.0
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          server-id: github
+          settings-path: ${{ github.workspace }}
+      - name: Configure settings.xml server creds
+        run: |
+          mkdir -p ~/.m2
+          cp $GITHUB_WORKSPACE/settings.xml ~/.m2/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & deploy
+        run: mvn -B -DskipTests deploy
