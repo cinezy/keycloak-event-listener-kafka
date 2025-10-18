@@ -43,8 +43,8 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
 
     // === Build Kafka config ===
     KafkaProducerHolder.Config c = new KafkaProducerHolder.Config();
-    c.bootstrapServers = root.get("kafka.bootstrap-servers", "localhost:9092");
-    c.clientId = root.get("kafka.client-id", "keycloak");
+    c.bootstrapServers = root.get("bootstrap-servers", "localhost:9092");
+    c.clientId = root.get("client-id", "keycloak");
     c.acks = root.get("producer.acks", "all");
     c.retries = root.getInt("producer.retries", 3);
     c.lingerMs = root.getInt("producer.linger-ms", 5);

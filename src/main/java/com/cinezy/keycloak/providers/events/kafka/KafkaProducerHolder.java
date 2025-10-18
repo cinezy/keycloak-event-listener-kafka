@@ -72,6 +72,7 @@ public final class KafkaProducerHolder {
   }
 
   public static void sendAsync(String topic, String key, String json) {
+    log.debugf("Sending event to Kafka: topic=%s, key=%s, json=%s", topic, key, json);
     var rec = new ProducerRecord<>(topic, bytes(key), bytes(json));
     producer.send(
         rec,
@@ -83,6 +84,7 @@ public final class KafkaProducerHolder {
   }
 
   public static void sendSync(String topic, String key, String json) throws Exception {
+    log.debugf("Sending event to Kafka: topic=%s, key=%s, json=%s", topic, key, json);
     var rec = new ProducerRecord<>(topic, bytes(key), bytes(json));
     producer.send(rec).get(10, TimeUnit.SECONDS);
   }
