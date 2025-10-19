@@ -2,6 +2,7 @@ package com.cinezy.keycloak.providers.events.kafka.model;
 
 import org.keycloak.events.Event;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public record UserEventPayload(
     long time,
     Map<String, String> details) {
   public static UserEventPayload from(Event e, KeycloakSession session) {
-    var realm = session.realms().getRealm(e.getRealmId());
+    RealmModel realm = session.realms().getRealm(e.getRealmId());
     return new UserEventPayload(
         e.getRealmId(),
         realm != null ? realm.getName() : null,

@@ -44,9 +44,9 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
   public void onEvent(Event event) {
     if (!enableUserEvents) return;
     try {
-      var payload = UserEventPayload.from(event, session);
-      var json = mapper.writeValueAsString(payload);
-      var key = payload.key();
+      UserEventPayload payload = UserEventPayload.from(event, session);
+      String json = mapper.writeValueAsString(payload);
+      String key = payload.key();
       if (sync) {
         KafkaProducerHolder.sendSync(topicUser, key, json);
       } else {
@@ -62,9 +62,10 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
   public void onEvent(AdminEvent adminEvent, boolean includeRepresentation) {
     if (!enableAdminEvents) return;
     try {
-      var payload = AdminEventPayload.from(adminEvent, session, includeRepresentation);
-      var json = mapper.writeValueAsString(payload);
-      var key = payload.key();
+      AdminEventPayload payload =
+          AdminEventPayload.from(adminEvent, session, includeRepresentation);
+      String json = mapper.writeValueAsString(payload);
+      String key = payload.key();
       if (sync) {
         KafkaProducerHolder.sendSync(topicAdmin, key, json);
       } else {
