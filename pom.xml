@@ -11,7 +11,7 @@
     <url>https://github.com/cinezy/keycloak-event-listener-kafka</url>
 
     <properties>
-        <keycloak.version>26.4.1</keycloak.version>
+        <keycloak.version>26.4.2</keycloak.version>
         <kafka.clients.version>4.1.0</kafka.clients.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
