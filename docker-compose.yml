@@ -51,6 +51,7 @@ services:
       KC_SPI_EVENTS_LISTENER_KAFKA_ENABLE_ADMIN_EVENTS: "true"
       KC_SPI_EVENTS_LISTENER_KAFKA_SYNC: "false"
       KC_LOG_LEVEL: info,com.cinezy:debug
+      KC_METRICS_ENABLED: true
 
     volumes:
       # Put your shaded provider JAR(s) in ./providers
