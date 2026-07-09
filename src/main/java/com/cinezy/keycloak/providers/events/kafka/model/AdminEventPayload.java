@@ -2,6 +2,7 @@ package com.cinezy.keycloak.providers.events.kafka.model;
 
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 
 public record AdminEventPayload(
     String realmId,
@@ -18,7 +19,7 @@ public record AdminEventPayload(
     ) {
   public static AdminEventPayload from(
       AdminEvent e, KeycloakSession session, boolean includeRepresentation) {
-    var realm = session.realms().getRealm(e.getRealmId());
+    RealmModel realm = session.realms().getRealm(e.getRealmId());
     return new AdminEventPayload(
         e.getRealmId(),
         realm != null ? realm.getName() : null,

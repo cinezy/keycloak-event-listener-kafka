@@ -69,24 +69,45 @@ public final class KafkaProducerHolder {
     }
 
     producer = new KafkaProducer<>(props);
+
+    // initialize metrics (safe/no-op if Micrometer not present)
+    Metrics.initIfPossible();
   }
 
   public static void sendAsync(String topic, String key, String json) {
-    log.debugf("Sending event to Kafka: topic=%s, key=%s, json=%s", topic, key, json);
-    var rec = new ProducerRecord<>(topic, bytes(key), bytes(json));
+    log.debugf("Sending async event to Kafka: topic=%s, key=%s, json=%s", topic, key, json);
+    Metrics.Sample sample = getSample(topic, json);
+
+    ProducerRecord<byte[], byte[]> rec = new ProducerRecord<>(topic, bytes(key), bytes(json));
     producer.send(
         rec,
         (meta, ex) -> {
           if (ex != null) {
             log.errorf(ex, "Failed to publish event to Kafka");
+            sample.stopFailure(classify(ex));
+          } else {
+            sample.stopSuccess();
           }
         });
   }
 
   public static void sendSync(String topic, String key, String json) throws Exception {
-    log.debugf("Sending event to Kafka: topic=%s, key=%s, json=%s", topic, key, json);
-    var rec = new ProducerRecord<>(topic, bytes(key), bytes(json));
-    producer.send(rec).get(10, TimeUnit.SECONDS);
+    log.debugf("Sending sync event to Kafka: topic=%s, key=%s, json=%s", topic, key, json);
+    Metrics.Sample sample = getSample(topic, json);
+    ProducerRecord<byte[], byte[]> rec = new ProducerRecord<>(topic, bytes(key), bytes(json));
+    try {
+      producer.send(rec).get(10, TimeUnit.SECONDS);
+      sample.stopSuccess();
+    } catch (Exception e) {
+      sample.stopFailure(classify(e));
+      throw e;
+    }
+  }
+
+  private static Metrics.Sample getSample(String topic, String json) {
+    Metrics.recordPayloadSize(
+        topic, json != null ? json.getBytes(StandardCharsets.UTF_8).length : 0);
+    return Metrics.sampleSend(topic);
   }
 
   private static byte[] bytes(String s) {
@@ -121,5 +142,16 @@ public final class KafkaProducerHolder {
 
     // Extra passthrough properties (props.*)
     public Properties extraProps = new Properties();
+  }
+
+  private static String classify(Throwable t) {
+    String c = t.getClass().getSimpleName();
+    // coarsen to stable labels; avoid high cardinality
+    if (c.isEmpty()) return "unknown";
+    if (c.contains("Timeout")) return "timeout";
+    if (c.contains("Authorization") || c.contains("Authentication")) return "auth";
+    if (c.contains("Serialization")) return "serialization";
+    if (c.contains("Leader") || c.contains("NotLeader")) return "leader";
+    return c.toLowerCase();
   }
 }

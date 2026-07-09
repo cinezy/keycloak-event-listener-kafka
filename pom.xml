@@ -4,7 +4,7 @@
 
     <groupId>com.cinezy.keycloak</groupId>
     <artifactId>keycloak-event-listener-kafka</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <packaging>jar</packaging>
 
     <name>keycloak-event-listener-kafka</name>
@@ -34,6 +34,16 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-model-jpa</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

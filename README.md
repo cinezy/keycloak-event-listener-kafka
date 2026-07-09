@@ -75,18 +75,6 @@ extraEnv:
 
 ---
 
-### Test with Docker compose
-```bash
-mvn clean package -DskipTests
-
-mkdir -p providers
-# copy your jar into ./providers/
-cp target/keycloak-event-listener-kafka-*.jar ./providers/
-
-docker-compose up -d
-
-```
-
 ## ⚙️ Configuration
 
 All configuration lives under one **flat scope** (`spi-events-listener-kafka-*`),  
@@ -169,6 +157,17 @@ Sending event to Kafka: topic=keycloak.user.events, key=null, value={"type":"LOG
 4. Enable *Save Events* and *Admin Events* if needed.
 
 ---
+## 🧪 Local Testing with Docker compose
+```bash
+mvn clean package -DskipTests
+
+mkdir -p providers
+# copy your jar into ./providers/
+cp target/keycloak-event-listener-kafka-*.jar ./providers/
+
+docker-compose up -d
+
+```
 
 ## 🧪 Local Testing (Redpanda / Kafka)
 
